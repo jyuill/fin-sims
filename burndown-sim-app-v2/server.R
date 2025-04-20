@@ -24,6 +24,9 @@ options(scipen = 10)
 dollar_format(accuracy=1000)
 
 theme_set(theme_bw())
+# set color palette
+# - bar and line colors
+bar_col <- brewer.pal(n=9, name='Blues')[7] # #081D58
 
 ## Server logic for:
 ## - running simulations of investment returns based on inputs in web app
@@ -136,21 +139,59 @@ shinyServer(function(input, output) {
     ## percent of sims with money ####
     output$probPlot <- renderPlotly({
         ## line chart showing percent with money each yr
-        p2 <- sim_check() %>% ggplot(aes(x=as.factor(yr), y=status_pc))+
+        p2 <- sim_check() %>% ggplot(aes(x=as.factor(yr), y=status_pc, 
+                                         text=paste0("yr: ",yr,
+                                                     "<br>% remaining: ", status_pc)))+
             #geom_col()+
             geom_line(group=1)+
             scale_y_continuous(labels=percent, expand=c(0,0), limit=c(0,1))+
             scale_x_discrete(expand=c(0,0))+
-            labs(title="% of Sims with Money at each Yr.", x='years from start', y='% of simulations')
-        ggplotly(p2)
+            labs(title="% of Sims with Money at each Yr.", 
+                 x='years from start', 
+                 y='% of simulations')
+        ggplotly(p2, tooltip="text") %>% 
+            layout(hovermode="closest")
     })
     
     ## histogram of annual returns ####
     output$returnHist <- renderPlotly({
       ## histogram 
-      p <- sim_all() %>% ggplot(aes(x=rrate))+geom_histogram()+
+      p <- sim_all() %>% ggplot(aes(x=rrate))+geom_histogram(fill=bar_col)+
         scale_x_continuous(labels=percent, expand=c(0,0))+
-        labs(title="Distribution of Annual Returns", x='Annual Return', y='# of Yrs')
+        geom_vline(aes(xintercept=mean(rrate)), color='red', linetype='dashed', linewidth=1)+
+        geom_vline(aes(xintercept=median(rrate)), color='blue', linetype='dashed', linewidth=1)+
+        geom_vline(aes(xintercept=quantile(rrate, 0.10)), color='green', linetype='dashed', linewidth=1)+
+        geom_vline(aes(xintercept=quantile(rrate, 0.90)), color='green', linetype='dashed', linewidth=1)+
+        labs(title="Distribution of Annual Returns", 
+             x='Annual Return', 
+             y='# of Yrs',
+             subtitle="Red: mean; Blue: median; Green: 10th/90th percentiles",
+             caption="Red: mean; Blue: median; Green: 10th/90th percentiles")
+      # subtitle and caption doesn't show up in plotly
+      ggplotly(p)
+    })
+    ## caption for histogram -> since ggplot subtitle / caption doesn't show in plotly
+    # - hardcoded in ui.R instead -> this could be used to respond to dynamic percentiles, if added later
+    output$returnHistCap <- renderText({
+      "Red: mean; Blue: median; Green: 10th/90th percentiles"
+    })
+    
+    ## histogram of # of yrs at 0 balance ####
+    ## - redundant: opposite of burndown line chart
+    output$zeroHist <- renderPlotly({
+        ## histogram 
+        p <- sim_all() %>% filter(balance==0) %>% ggplot(aes(x=year))+geom_histogram()+
+            scale_x_continuous(expand=c(0,0))+
+            labs(title="Distribution of Years at 0 Balance", x='Years', y='# of Cases')
+        ggplotly(p)
+    })
+    ## - % version but even more redundant
+    output$zeroHistpc <- renderPlotly({
+      ## histogram 
+      p <- sim_check_all_wide() %>% ggplot(aes(x=as.factor(yr), y=(1-status_pc)))+
+        geom_col()+
+        #scale_x_continuous(expand=c(0,0))+
+        labs(title="Distribution of Years at 0 Balance", x='Years', y='# of Cases')
       ggplotly(p)
     })
 })

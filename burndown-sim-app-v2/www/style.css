@@ -1,0 +1,17 @@
+/* css styles for burndown app */
+
+.caption {
+  margin-top: 4px; 
+  /*margin-left: 60px; */
+  text-align: center;
+  font-size: 0.9em; 
+  font-style: italic;
+  color: #666;
+}
+
+.footer {
+  margin-top: 20px; 
+  padding: 10px; 
+  border-top: 2px solid #ddd; 
+  text-align: center;
+}
