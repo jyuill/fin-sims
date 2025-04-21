@@ -26,11 +26,12 @@ theme_set(theme_bw())
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
     includeCSS("www/style.css"),
-    # Application title
+    # Application title ####
     titlePanel("Savings Burndown Simulation"),
 
-    # Sidebar with a slider input for number of bins
+    # Sidebar with a slider input for number of bins ####
     sidebarLayout(
+      # sidebarPanel ####
         sidebarPanel(
             numericInput(inputId='nsims', '# of Simulations', value=100, min=1, max=5000, step=50),
             numericInput(inputId='nyrs', "# of Yrs", value=20, min=5, max=30, step=1),
@@ -51,11 +52,11 @@ shinyUI(fluidPage(
             actionButton(inputId='runsim', label="Run Sims", style="material-flat", 
                          icon("play"), class="btn btn-success"),
         ),
-
+        # mainPanel ####
         # Show a plot of the generated distribution
         mainPanel(
           tabsetPanel(
-            tabPanel("Results",
+            tabPanel("Results", # Results ####
             #plotOutput("distPlot"),
             h3("Results"),
             p("Select settings on left, then click 'Run Sims' to see how long your savings are likely to last. (may take a few seconds to load)"),
@@ -71,14 +72,14 @@ shinyUI(fluidPage(
                 <span style='color:green'>Green</span>=10th/90th percentile.)" 
               )
             ),
-            # FOOTER ----
+            #> FOOTER ----
             tags$div(
               "© 2025 A", 
               tags$a(href="https://www.catbird-analytics.com/", 'Catbird Analytics'),
               " Production, John Yuill", 
               class="footer") # end of footer
           ), # end results tab
-          tabPanel("About",
+          tabPanel("About", # About ####
             h3("About this App"),
             h4("How long will your savings last?"),
             p(HTML("This app uses data simulation, based on user-defined parameters, to answer the question: 
